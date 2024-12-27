@@ -4,17 +4,8 @@ import com.stuff.location_service.model.User;
 
 import java.util.List;
 import java.util.Map;
+import org.springframework.data.mongodb.repository.MongoRepository;
 
-public interface UserRepository {
-    List<User> FindAllUsers();
-
-    User FindUser(String id);
-
-    void CreateUser(User user);
-
-    void DeleteUser(User user);
-
-    void UpdateUser(User user, User newUser);
-
-    User FindUserFromEmail(String email);
+public interface UserRepository extends MongoRepository<User, String> {
+    User findByEmail(String email);
 }

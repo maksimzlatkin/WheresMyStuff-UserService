@@ -18,53 +18,50 @@ public class UserService {
     private final UserRepository userRepository;
     UserMapper mapper = new UserMapper();
 
-    public void CreateUser(UserCreateRequest householdCreateRequest){
-        userRepository.CreateUser(mapper.toUser(householdCreateRequest, UUID.randomUUID().toString()));
+    public void createUser(UserCreateRequest householdCreateRequest){
+        userRepository.save(mapper.toUser(householdCreateRequest, UUID.randomUUID().toString()));
     }
 
-    public List<UserDto> GetUsers(){
+    public List<UserDto> getUsers(){
         List<UserDto> users = new ArrayList<UserDto>();
-        for (User user : userRepository.FindAllUsers()) {
+        for (User user : userRepository.findAll()) {
             users.add(mapper.toUserDto(user));
         }
         return users;
     }
 
-    public UserDto GetUser(String id){
-        User user = GetUserOrThrowException(id);
+    public UserDto getUser(String id){
+        User user = getUserOrThrowException(id);
         return mapper.toUserDto(user);
     }
 
-    public UserDto GetUserFromEmail(String email){
-        User user = GetUserFromEmailOrThrowException(email);
+    public UserDto getUserFromEmail(String email){
+        User user = getUserFromEmailOrThrowException(email);
         return mapper.toUserDto(user);
     }
 
-    public void DeleteUser(String id){
-        User user = GetUserOrThrowException(id);
-        userRepository.DeleteUser(user);
+    public void deleteUser(String id){
+        User user = getUserOrThrowException(id);
+        userRepository.delete(user);
     }
 
-    public void UpdateUser(String id, UserCreateRequest userCreateRequest){
-//        CreateUser(User);
+    public void updateUserField(String id, UserCreateRequest userCreateRequest) {
+        User user = getUserOrThrowException(id);
+        user.setName(userCreateRequest.getName());
+        user.setEmail(user.getEmail());
+        userRepository.save(user);
     }
 
-    public void UpdateUserField(String id, String fields) {
-        User user = GetUserOrThrowException(id);
-        User newUser = mapper.toUserFromJson(id, fields);
-        userRepository.UpdateUser(user, newUser);
-    }
-
-    private User GetUserOrThrowException(String id){
-        User user = userRepository.FindUser(id);
-        if (user == null) {
+    private User getUserOrThrowException(String id){
+        Optional<User> user = userRepository.findById(id);
+        if (user.isEmpty()) {
             throw new EntityNotFoundException(String.format("User with id='%s' not found", id));
         }
-        return user;
+        return user.get();
     }
 
-    private User GetUserFromEmailOrThrowException(String email){
-        User user = userRepository.FindUserFromEmail(email);
+    private User getUserFromEmailOrThrowException(String email){
+        User user = userRepository.findByEmail(email);
         if (user == null) {
             throw new EntityNotFoundException(String.format("User with email='%s' not found", email));
         }
